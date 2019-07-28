@@ -8,16 +8,24 @@ import smtplib
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
-# print(voices[1].id)
+# print(voices)  # Checking the inbuild voices in the system.
 engine.setProperty('voice', voices[0].id)
+
+# getting the default speech rate
+# rate = engine.getProperty('rate')
+# print(rate)
+ 
+engine.setProperty('rate', 150) # slowing down the speech rate
 
 
 def speak(audio):
+    """ This function converts the string input into voice output."""
     engine.say(audio)
     engine.runAndWait()
 
 
-def wishMe():
+def wishUser():
+    """This function wishes the user according to the time of the day, then asks for the command from the user."""
     hour = int(datetime.datetime.now().hour)
     if hour>=0 and hour<12:
         speak("Good Morning!")
@@ -28,16 +36,18 @@ def wishMe():
     else:
         speak("Good Evening!")  
 
-    speak("I am Jarvis Sir. Please tell me how may I help you")       
+    speak("I am VCR, a voice command recognition tool. Please tell me how can I help you?")  
 
-def takeCommand():
-    #It takes microphone input from the user and returns string output
+
+def takeCommands():
+    """This function takes microphone input from the user and returns string output."""
 
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
         r.pause_threshold = 1
         audio = r.listen(source)
+        r.adjust_for_ambient_noise(source, duration=5)   # environment noise supression.
 
     try:
         print("Recognizing...")    
@@ -59,10 +69,10 @@ def sendEmail(to, content):
     server.close()
 
 if __name__ == "__main__":
-    wishMe()
+    wishUser()
     while True:
     # if 1:
-        query = takeCommand().lower()
+        query = takeCommands().lower()
 
         # Logic for executing tasks based on query
         if 'wikipedia' in query:
@@ -84,26 +94,37 @@ if __name__ == "__main__":
 
 
         elif 'play music' in query:
-            music_dir = 'D:\\Non Critical\\songs\\Favorite Songs2'
+            music_dir = 'Path of directory containing music files.'
             songs = os.listdir(music_dir)
             print(songs)    
             os.startfile(os.path.join(music_dir, songs[0]))
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M:%S")    
-            speak(f"Sir, the time is {strTime}")
+            speak(f"The time is {strTime}")
 
         elif 'open code' in query:
-            codePath = "C:\\Users\\Haris\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            codePath = "Path of Code.exe file." #Visual Studio Code.
             os.startfile(codePath)
 
-        elif 'email to harry' in query:
+        elif 'email to <receiver>' in query:
             try:
                 speak("What should I say?")
-                content = takeCommand()
-                to = "harryyourEmail@gmail.com"    
+                content = takeCommands()
+                to = "receiverEmail@gmail.com"    
                 sendEmail(to, content)
                 speak("Email has been sent!")
             except Exception as e:
                 print(e)
-                speak("Sorry my friend harry bhai. I am not able to send this email") 
+                speak("Sorry, I am not able to send this email.")
+
+        elif 'quit' in query:
+            speak("VCR quitting. Thank you for your time.")
+            exit()
+
+        else:
+            speak("No input. VCR quitting. Thank you for your time.")
+            exit()
+
+
+                                               # -- End of code -- #
